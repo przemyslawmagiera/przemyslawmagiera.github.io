@@ -1,5 +1,5 @@
 # Site settings
-title: Przemyslaw Magiera
+title: Przemyslaw Magiera (beta website)
 name: Przemyslaw Magiera
 
 # Build settings
@@ -8,8 +8,6 @@ markdown: kramdown
 #User specific content
 #Links that will appear in the navbar
 primarylinks:
- - title: Blog
-   url: http://automateddeveloper.blogspot.com/
  - title: GitHub
    url: https://github.com/przemyslawmagiera
  - title: LinkedIn
