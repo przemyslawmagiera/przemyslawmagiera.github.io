@@ -54,18 +54,13 @@ education:
    subject: Advanced Computer Science
    school: University of Liverpool
  - level: Bachelor of Science (BSc.)
-   date: 2015-2019
+   date: 2019
    subject: Computer Science
    school: Wroclaw University of Science and Technology
 
 #List of interesting Github repo/projects to include - optional
 github:
  - przemyslawmagiera/genetic-algorithms-fun
-
-#Stackoverflow flair is optional
-stackoverflow:
-   profileurl: http://stackoverflow.com/users/258813/rhinds
-   flairimageurl: http://stackoverflow.com/users/flair/258813.png
 
 intro: |
  Remote Java Developer, Student and Computer Science enthusiast. I have been programming commercially since 2016 and as a
