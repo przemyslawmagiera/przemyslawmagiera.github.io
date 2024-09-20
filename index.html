@@ -71,7 +71,7 @@
             resizeCanvas();
             snake = [{ x: 10, y: 10 }];
             apple = { x: 15, y: 15 };
-            direction = { x: 0, y: 0 };
+            direction = { x: 1, y: 0 }; // Ustawienie początkowego kierunku ruchu
             score = 0;
             scoreElement.textContent = 'Wynik: ' + score;
             gameOverElement.style.display = 'none';
@@ -102,8 +102,9 @@
                 return;
             }
 
-            // Sprawdzenie kolizji z samym sobą
-            for (let segment of snake) {
+            // Sprawdzenie kolizji z samym sobą (pomijając głowę)
+            for (let i = 1; i < snake.length; i++) {
+                let segment = snake[i];
                 if (head.x === segment.x && head.y === segment.y) {
                     gameOver();
                     return;
