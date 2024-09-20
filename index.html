@@ -1,20 +1,218 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background-color: #000;
+            touch-action: none;
+        }
+        #score {
+            position: absolute;
+            color: #fff;
+            font-size: 20px;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            font-family: Arial, sans-serif;
+        }
+        #gameOver {
+            position: absolute;
+            color: #fff;
+            font-size: 40px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            font-family: Arial, sans-serif;
+            display: none;
+            text-align: center;
+        }
+        #restartButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Wynik: 0</div>
+    <div id="gameOver">
+        <div>Koniec gry!</div>
+        <button id="restartButton">Zagraj ponownie</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const gameOverElement = document.getElementById('gameOver');
+        const restartButton = document.getElementById('restartButton');
 
-<div class="row">
-	<div class="col-md-9 rightBorder">
-		{% include section_intro.html %}
-		{% include section_skills.html %}
-		{% include section_workexperience.html %}
-		{% include section_coursera.html %}
-		{% include section_github.html %}
-		{% include section_mobileapps.html %}
-		{% include section_additionalinfo.html %}
-		{% include section_speakerdeck.html %}
-	</div>
-	<div class="col-md-3">
-		{% include section_stackoverflow.html %}
-		{% include section_blogs.html %}
-	</div>
-</div>
+        let canvasSize;
+        let tileSize;
+        let snake;
+        let apple;
+        let direction;
+        let score;
+        let gameInterval;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        function init() {
+            resizeCanvas();
+            snake = [{ x: 10, y: 10 }];
+            apple = { x: 15, y: 15 };
+            direction = { x: 0, y: 0 };
+            score = 0;
+            scoreElement.textContent = 'Wynik: ' + score;
+            gameOverElement.style.display = 'none';
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, 100);
+        }
+
+        function resizeCanvas() {
+            canvasSize = Math.min(window.innerWidth, window.innerHeight);
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+            tileSize = canvasSize / 20;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function gameLoop() {
+            update();
+            draw();
+        }
+
+        function update() {
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            // Sprawdzenie kolizji ze ścianami
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+                gameOver();
+                return;
+            }
+
+            // Sprawdzenie kolizji z samym sobą
+            for (let segment of snake) {
+                if (head.x === segment.x && head.y === segment.y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+
+            // Sprawdzenie, czy zjedzono jabłko
+            if (head.x === apple.x && head.y === apple.y) {
+                score++;
+                scoreElement.textContent = 'Wynik: ' + score;
+                placeApple();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+            // Rysowanie jabłka
+            ctx.fillStyle = 'red';
+            ctx.fillRect(apple.x * tileSize, apple.y * tileSize, tileSize, tileSize);
+
+            // Rysowanie węża
+            ctx.fillStyle = 'lime';
+            for (let segment of snake) {
+                ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize);
+            }
+        }
+
+        function placeApple() {
+            apple.x = Math.floor(Math.random() * 20);
+            apple.y = Math.floor(Math.random() * 20);
+            // Upewnij się, że jabłko nie pojawi się na wężu
+            for (let segment of snake) {
+                if (apple.x === segment.x && apple.y === segment.y) {
+                    placeApple();
+                    break;
+                }
+            }
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            gameOverElement.style.display = 'block';
+        }
+
+        document.addEventListener('keydown', function (e) {
+            switch (e.keyCode) {
+                case 37: // lewo
+                    if (direction.x !== 1) {
+                        direction = { x: -1, y: 0 };
+                    }
+                    break;
+                case 38: // góra
+                    if (direction.y !== 1) {
+                        direction = { x: 0, y: -1 };
+                    }
+                    break;
+                case 39: // prawo
+                    if (direction.x !== -1) {
+                        direction = { x: 1, y: 0 };
+                    }
+                    break;
+                case 40: // dół
+                    if (direction.y !== -1) {
+                        direction = { x: 0, y: 1 };
+                    }
+                    break;
+            }
+        });
+
+        // Obsługa sterowania dotykowego
+        canvas.addEventListener('touchstart', function (e) {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        });
+
+        canvas.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', function (e) {
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0 && direction.x !== -1) {
+                    direction = { x: 1, y: 0 }; // prawo
+                } else if (deltaX < 0 && direction.x !== 1) {
+                    direction = { x: -1, y: 0 }; // lewo
+                }
+            } else {
+                if (deltaY > 0 && direction.y !== -1) {
+                    direction = { x: 0, y: 1 }; // dół
+                } else if (deltaY < 0 && direction.y !== 1) {
+                    direction = { x: 0, y: -1 }; // góra
+                }
+            }
+        });
+
+        restartButton.addEventListener('click', init);
+
+        init();
+    </script>
+</body>
+</html>
